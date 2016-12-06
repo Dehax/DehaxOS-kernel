@@ -1,6 +1,6 @@
 ; A boot sector that boots a C kernel in 32-bit protected mode
 [org 0x7c00]
-KERNEL_OFFSET equ 0xA000
+KERNEL_OFFSET equ 0x1000
 
 	mov [BOOT_DRIVE], dl
 	
@@ -14,10 +14,11 @@ KERNEL_OFFSET equ 0xA000
 	
 	call switch_to_pm
 	
-	hlt
+	jmp $
 
 %include "print/print_string.asm"
 %include "disk/disk_load.asm"
+;%include "disk/disk_info.asm"
 %include "pm/gdt.asm"
 %include "pm/print_string_pm.asm"
 %include "pm/switch_to_pm.asm"
@@ -31,24 +32,27 @@ load_kernel:
 	mov bx, KERNEL_OFFSET
 	mov dh, 15
 	mov dl, [BOOT_DRIVE]
+	call print_hex_as_string
+	;call disk_info
 	call disk_load
-	
+	mov dx, [KERNEL_OFFSET]
+	call print_hex_as_string
 	ret
 
 [bits 32]
 BEGIN_PM:
-	;mov ebx, MSG_PROT_MODE
-	;call print_string_pm
+	mov ebx, MSG_PROT_MODE
+	call print_string_pm
 	
 	call KERNEL_OFFSET
 	
-	hlt
+	jmp $
 	
 ; Global
-BOOT_DRIVE db 0
-MSG_REAL_MODE db "Started in 16-bit Real Mode", 0
-MSG_PROT_MODE db "Successfully landed in 32-bit protected mode", 0
-MSG_LOAD_KERNEL db "Loading kernel into memory...", 0
+BOOT_DRIVE db 0x0
+MSG_REAL_MODE db "16 Real", 0
+MSG_PROT_MODE db "32 PM", 0
+MSG_LOAD_KERNEL db "Loading kernel...", 0
 
 times 510-($-$$) db 0
 dw 0xAA55

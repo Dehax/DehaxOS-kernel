@@ -4,4 +4,4 @@
 
 _start:
 	call kmain
-	hlt
+	jmp $
