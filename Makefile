@@ -6,6 +6,9 @@ OBJ := $(C_SOURCES:.c=.o)
 
 all : dehaxos.img
 
+run : dehaxos.img
+	qemu-system-i386 -s -S $<
+
 dehaxos.img : boot/boot.bin kernel.bin
 	cat $^ > $@
 
